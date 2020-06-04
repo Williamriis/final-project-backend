@@ -81,6 +81,14 @@ app.get('/squares', async (req, res) => {
 
 })
 
+app.post('/movepiece', async (req, res) => {
+  const movedTo = await Square.findOneAndUpdate({ row: req.body.targetSquare.row, column: req.body.targetSquare.column },
+    { piece: req.body.baseSquare.piece }, { new: true })
+  const movedFrom = await Square.findOneAndUpdate({ row: req.body.baseSquare.row, column: req.body.baseSquare.column }, { piece: {} })
+  const squares = await Square.find()
+  res.json(squares)
+})
+
 app.get('/books/:id', async (req, res) => {
   const foundBook = await Book.findOne({ bookID: req.params.id })
   if (foundBook) {

@@ -1,0 +1,600 @@
+[
+    {
+        "row": 1,
+        "column": 1,
+        "piece": {
+            "type": "rookOne",
+            "color": "white",
+            "restingImage": "require('../assets/white-rook.svg.png')",
+            "activeImage": "require('../assets/active-white-rook.svg.png')",
+            "image": "require('../assets/white-rook.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 2,
+        "piece": {
+            "type": "knight",
+            "color": "white",
+            "restingImage": "require('../assets/white-knight.svg.png')",
+            "activeImage": "require('../assets/active-white-knight.svg.png')",
+            "image": "require('../assets/white-knight.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 3,
+        "piece": {
+            "type": "bishop",
+            "color": "white",
+            "restingImage": "require('../assets/white-bishop.svg.png')",
+            "activeImage": "require('../assets/active-white-bishop.png')",
+            "image": "require('../assets/white-bishop.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 4,
+        "piece": {
+            "type": "queen",
+            "color": "white",
+            "restingImage": "require('../assets/white-queen.svg.png')",
+            "activeImage": "require('../assets/active-white-queen.svg.png')",
+            "image": "require('../assets/white-queen.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 5,
+        "piece": {
+            "type": "king",
+            "color": "white",
+            "restingImage": "require('../assets/white-king.svg.png')",
+            "activeImage": "require('../assets/active-white-king.svg.png')",
+            "image": "require('../assets/white-king.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 6,
+        "piece": {
+            "type": "bishop",
+            "color": "white",
+            "restingImage": "require('../assets/white-bishop.svg.png')",
+            "activeImage": "require('../assets/active-white-bishop.png')",
+            "image": "require('../assets/white-bishop.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 7,
+        "piece": {
+            "type": "knight",
+            "color": "white",
+            "restingImage": "require('../assets/white-knight.svg.png')",
+            "activeImage": "require('../assets/active-white-knight.svg.png')",
+            "image": "require('../assets/white-knight.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 1,
+        "column": 8,
+        "piece": {
+            "type": "rookTwo",
+            "color": "white",
+            "restingImage": "require('../assets/white-rook.svg.png')",
+            "activeImage": "require('../assets/active-white-rook.svg.png')",
+            "image": "require('../assets/white-rook.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 1,
+        "piece": {
+            "type": "pawnOne",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 2,
+        "piece": {
+            "type": "pawnTwo",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 3,
+        "piece": {
+            "type": "pawnThree",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 4,
+        "piece": {
+            "type": "pawnFour",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 5,
+        "piece": {
+            "type": "pawnFive",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 6,
+        "piece": {
+            "type": "pawnSix",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 7,
+        "piece": {
+            "type": "pawnSeven",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 2,
+        "column": 8,
+        "piece": {
+            "type": "pawnEight",
+            "color": "white",
+            "restingImage": "require('../assets/white-pawn.svg.png')",
+            "activeImage": "require('../assets/active-white-pawn.svg.png')",
+            "image": "require('../assets/white-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 1,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 2,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 3,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 4,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 5,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 6,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 7,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 3,
+        "column": 8,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 1,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 2,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 3,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 4,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 5,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 6,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 7,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 4,
+        "column": 8,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 1,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 2,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 3,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 4,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 5,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 6,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 7,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 5,
+        "column": 8,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 1,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 2,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 3,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 4,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 5,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 6,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 7,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 6,
+        "column": 8,
+        "piece": {},
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 1,
+        "piece": {
+            "type": "pawnOne",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 2,
+        "piece": {
+            "type": "pawnTwo",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 3,
+        "piece": {
+            "type": "pawnThree",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 4,
+        "piece": {
+            "type": "pawnFour",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 5,
+        "piece": {
+            "type": "pawnFive",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 6,
+        "piece": {
+            "type": "pawnSix",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 7,
+        "piece": {
+            "type": "pawnSeven",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 7,
+        "column": 8,
+        "piece": {
+            "type": "pawnEight",
+            "color": "black",
+            "restingImage": "require('../assets/black-pawn.svg.png')",
+            "activeImage": "require('../assets/active-black-pawn.svg.png')",
+            "image": "require('../assets/black-pawn.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 1,
+        "piece": {
+            "type": "rookOne",
+            "color": "black",
+            "restingImage": "require('../assets/black-rook.svg.png')",
+            "activeImage": "require('../assets/active-black-rook.svg.png')",
+            "image": "require('../assets/black-rook.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 2,
+        "piece": {
+            "type": "knight",
+            "color": "black",
+            "restingImage": "require('../assets/black-knight.svg.png')",
+            "activeImage": "require('../assets/active-black-knight.svg.png')",
+            "image": "require('../assets/black-knight.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 3,
+        "piece": {
+            "type": "bishop",
+            "color": "black",
+            "restingImage": "require('../assets/black-bishop.svg.png')",
+            "activeImage": "require('../assets/active-black-bishop.svg.png')",
+            "image": "require('../assets/black-bishop.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 4,
+        "piece": {
+            "type": "queen",
+            "color": "black",
+            "restingImage": "require('../assets/black-queen.svg.png')",
+            "activeImage": "require('../assets/active-black-queen.svg.png')",
+            "image": "require('../assets/black-queen.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 5,
+        "piece": {
+            "type": "king",
+            "color": "black",
+            "restingImage": "require('../assets/black-king.svg.png')",
+            "activeImage": "require('../assets/active-black-king.svg.png')",
+            "image": "require('../assets/black-king.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 6,
+        "piece": {
+            "type": "bishop",
+            "color": "black",
+            "restingImage": "require('../assets/black-bishop.svg.png')",
+            "activeImage": "require('../assets/active-black-bishop.svg.png')",
+            "image": "require('../assets/black-bishop.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 7,
+        "piece": {
+            "type": "knight",
+            "color": "black",
+            "restingImage": "require('../assets/black-knight.svg.png')",
+            "activeImage": "require('../assets/active-black-knight.svg.png')",
+            "image": "require('../assets/black-knight.svg.png')"
+        },
+        "valid": false
+    },
+    {
+        "row": 8,
+        "column": 8,
+        "piece": {
+            "type": "rookTwo",
+            "color": "black",
+            "restingImage": "require('../assets/black-rook.svg.png')",
+            "activeImage": "require('../assets/active-black-rook.svg.png')",
+            "image": "require('../assets/black-rook.svg.png')",
+            "moved": false
+        },
+        "valid": false
+    }
+]

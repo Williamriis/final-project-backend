@@ -2,10 +2,10 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import mongoose from 'mongoose'
-import data from './data/books.json'
+import data from './data/squares.json'
 
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-mongo"
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
 
@@ -26,33 +26,11 @@ app.use((req, res, next) => {
 
 
 
-const Book = mongoose.model('Book', {
-  bookID: Number,
-  title: {
-    type: String
-
-  },
-  authors: String,
-  average_rating: {
-    type: Number,
-    default: 0,
-  },
-  num_pages: {
-    type: Number,
-    default: 0
-  },
-  ratings_count: {
-    type: Number,
-    default: 0
-  },
-  text_reviews_count: {
-    type: Number,
-    default: 0
-  },
-  img_url: {
-    type: String,
-    default: ''
-  }
+const Square = mongoose.model('Square', {
+  row: Number,
+  column: Number,
+  piece: Object,
+  valid: Boolean
 })
 
 const User = mongoose.model('User', {
@@ -76,86 +54,31 @@ const User = mongoose.model('User', {
 })
 
 
-const createRandomBook = async (num, titlesArray, authorArray) => {
-  await Book.deleteMany()
-  const arr = Array.apply(null, Array(num))
+if (process.env.RESET_DB) {
+  const seedDatabase = async () => {
+    await Square.deleteMany()
 
-  arr.forEach((val, index) => {
-    new Book({
-      bookID: index,
-      title: titlesArray[parseInt(titlesArray.length * Math.random())],
-      authors: authorArray[parseInt(authorArray.length * Math.random())],
-      num_pages: parseInt(Math.random() * 2000),
-      ratings_count: parseInt(Math.random() * 10000),
-      average_rating: (Math.random() * 5).toFixed(2)
-
-    }).save()
-  })
-
-
-}
-if (process.env.SEED_RANDOM) {
-  const generateRandomBooks = () => {
-    const bookTitles = []
-    const authors = []
-    data.forEach((book) => bookTitles.push(book.title))
-    data.forEach((book) => {
-      if (!authors.includes(book.authors.split('-')[0])) {
-        authors.push(book.authors.split('-')[0])
-      }
+    data.forEach((square) => {
+      new Square(square).save()
     })
-    createRandomBook(500, bookTitles, authors)
   }
-  generateRandomBooks()
+  seedDatabase()
 }
-
-// if (process.env.RESET_DB) {
-//   const seedDatabase = async () => {
-//     await Book.deleteMany()
-
-//     data.forEach((book) => {
-//       new Book(book).save()
-//     })
-//   }
-//   seedDatabase()
-// }
 
 
 app.get('/', (req, res) => {
   res.json({
-    homepage: '/books',
-    queryOrder: '?order=highest, lowest, longest, shortest',
-    queryKeyword: '?keyword=an author or title',
-    queryPage: '?page=1,2,3,4...',
-    individualBook: '/books/1,2,3,4...',
-    keywordResultsCanBeOrdered: 'true'
+    squares: '/squares'
   })
 })
 
 
+app.get('/squares', async (req, res) => {
 
-app.get('/books', async (req, res) => {
-  const keyword = req.query.keyword
-  const keyRegExp = new RegExp('\\b' + keyword + '\\b', 'i')
-  const order = req.query.order
-  const page = +req.query.page || 1
-  const PAGE_SIZE = 20
-  let mySort = order === 'highest' ? { average_rating: -1 } : order === 'lowest' ? { average_rating: 1 }
-    : order === 'longest' ? { num_pages: -1 } : order === 'shortest' ? { num_pages: 1 } : { bookID: 1 }
+  const squares = await Square.find()
 
-  if (keyword) {
-    const books = await Book.find({ $or: [{ title: keyRegExp }, { authors: keyRegExp }] }).sort(mySort).limit(PAGE_SIZE).skip((page * PAGE_SIZE) - PAGE_SIZE)
-    console.log(keyRegExp)
-    if (books.length > 0) {
-      res.json(books)
-    } else {
-      res.status(404).json({ error: `No books or authors in the database match the keyword '${keyword}'` })
-    }
+  res.json(squares)
 
-  } else {
-    const books = await Book.find().sort(mySort).limit(PAGE_SIZE).skip((page * PAGE_SIZE) - PAGE_SIZE)
-    res.json(books)
-  }
 })
 
 app.get('/books/:id', async (req, res) => {
@@ -202,37 +125,6 @@ app.post('/addbook', async (req, res) => {
     }
   ).save()
   res.send('book saved')
-})
-
-//Below is some code I began expirimenting with for my front-end but which I decided to put
-//aside for time being as it would have taken too long to get it all working. (And I'm not sure)
-//if this is really how users would actually be created for a real website. 
-
-app.post('/createuser', async (req, res) => {
-
-  const existingUser = await User.findOne({ username: req.body.username })
-
-  if (!existingUser) {
-    new User(
-      {
-        username: req.body.username,
-        password: req.body.password,
-      }
-    ).save()
-    res.send('User created')
-  } else {
-    res.json({ error: 'That username already exists.' })
-  }
-})
-
-app.post('/login', async (req, res) => {
-  const existingUser = await User.findOne({ password: req.body.password, username: req.body.username })
-  if (existingUser) {
-    res.json(existingUser)
-  } else {
-    res.json({ error: 'Invalid password or username' })
-  }
-
 })
 
 // Start the server

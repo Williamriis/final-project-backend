@@ -56,10 +56,6 @@ const User = mongoose.model('User', {
     type: Array,
     required: true
   },
-  initialBoardState: {
-    type: Array,
-    required: true
-  },
   accessToken: {
     type: String,
     default: () => crypto.randomBytes(128).toString('hex')
@@ -143,9 +139,8 @@ app.post('/game/:roomid/movepiece', async (req, res) => {
 
 app.get('/game/:roomid/reset', async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.roomid, accessToken: req.header('Authorization') })
-    const resetBoard = user.initialBoardState
-    const updatedUser = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: resetBoard }, { new: true })
+    const squares = await Square.find()
+    const updatedUser = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: squares }, { new: true })
     res.status(200).json(updatedUser.gameBoard)
   } catch (err) {
     res.status(404).json({ message: "Only the host can reset the game", error: err })

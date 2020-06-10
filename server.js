@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt-nodejs'
 
 
 
+
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
@@ -16,7 +17,8 @@ mongoose.set('useFindAndModify', false)
 
 const port = process.env.PORT || 8080
 const app = express()
-
+const http = require('http').createServer(app)
+const socketIo = require('socket.io')(http)
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -27,6 +29,9 @@ app.use((req, res, next) => {
     res.status(503).json({ error: 'Service unavailable' })
   }
 })
+
+
+
 
 const Square = mongoose.model('Square', {
   row: Number,
@@ -99,8 +104,8 @@ app.get('/users', async (req, res) => {
 
 
 app.get('/', async (req, res) => {
-  const squares = await Square.find()
-  res.json(squares)
+  res.send("hello")
+
 })
 
 
@@ -109,8 +114,10 @@ app.get('/game/:roomid', async (req, res) => {
   //host could be a findOneandUpdate which sets roomActive to true, which becomes a condition for the guest to enter
   //but then I don't know how to revert this to false if the host closes the browser without having clicked a 'logout' button
   try {
+
     const host = await User.findOne({ _id: req.params.roomid })
     const user = await User.findOne({ accessToken: req.header('Authorization') })
+
     res.json({
       gameBoard: host.gameBoard, initialBoardState: host.initialBoardState,
       username: user.username, host: host.username, color: host.username === user.username ? "white" : "black"
@@ -121,8 +128,11 @@ app.get('/game/:roomid', async (req, res) => {
   }
 
 })
+
+
 app.post('/game/:roomid/movepiece', authenticateUser)
 app.post('/game/:roomid/movepiece', async (req, res) => {
+  console.log('moving piece')
   try {
     const user = await User.findOne({ _id: req.params.roomid })
     const updatedBoard = user.gameBoard
@@ -131,11 +141,18 @@ app.post('/game/:roomid/movepiece', async (req, res) => {
     movedTo.piece = movedFrom.piece
     movedFrom.piece = {}
     const userBoard = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: updatedBoard }, { new: true })
-    res.status(200).json({ board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
+    //userBoard
+    // res.status(200).json({ board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
+    // socketIo.of(`${req.params.roomid}`).emit('update', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
+    socketIo.emit('update', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
+    //socketIo.emit('move', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white", room: req.params.roomid })
+
   } catch (err) {
     res.status(404).json({ message: "Invalid move", error: err })
   }
 })
+
+
 
 app.get('/game/:roomid/reset', async (req, res) => {
   try {
@@ -150,6 +167,7 @@ app.get('/game/:roomid/reset', async (req, res) => {
 })
 
 app.post('/signup', async (req, res) => {
+  console.log('new user is being created')
   try {
     const chessBoard = await Square.find()
     const username = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase()
@@ -208,7 +226,360 @@ app.post('/addbook', async (req, res) => {
   res.send('book saved')
 })
 
+const testCheck = (baseSquare, squares, i) => {
+  const validSquares = []
+
+  if (baseSquare.piece.type.includes('pawn') && baseSquare.piece.moved) {
+    if (baseSquare.piece.color === 'white') {
+      squares.forEach((square) => {
+        if ((baseSquare._id === square._id)) {
+          validSquares.push(square)
+        } else if (square.column === baseSquare.column && square.row === baseSquare.row + 1 && !square.piece.type) {
+          validSquares.push(square)
+        } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
+          square.row === baseSquare.row + 1 &&
+          square.piece.color && square.piece.color !== baseSquare.piece.color) {
+          validSquares.push(square)
+        } else {
+          square.valid = false;
+        }
+      })
+    } else {
+      squares.forEach((square) => {
+        if (baseSquare._id === square._id) {
+          validSquares.push(square)
+        } else if (square.column === baseSquare.column && square.row === baseSquare.row - 1 && !square.piece.type) {
+          validSquares.push(square)
+        } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
+          square.row === baseSquare.row - 1 && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+          validSquares.push(square)
+        } else {
+          square.valid = false;
+        }
+
+      })
+    }
+
+
+  } else if (baseSquare.piece.type.includes('pawn') && !baseSquare.piece.moved) {
+    if (baseSquare.piece.color === 'white') {
+      let i = 1;
+      for (i = 1; i <= 2; i++) {
+        squares.forEach((square) => {
+          if (baseSquare._id === square._id) {
+            validSquares.push(square)
+          } else if ((square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece) ||
+            (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece && !square.piece.color)) {
+            validSquares.push(square)
+          } else if (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece) {
+            i = 5;
+          }
+        })
+      }
+      squares.forEach((square) => {
+        if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
+          square.row === baseSquare.row + 1 &&
+          square.piece && square.piece.type && square.piece.color !== baseSquare.piece.color) {
+          validSquares.push(square)
+        }
+
+      })
+
+    } else if (baseSquare.piece.color === 'black') {
+      let i = -1;
+      for (i = -1; i >= -2; i--) {
+        squares.forEach((square) => {
+          if (baseSquare._id === square._id) {
+            validSquares.push(square)
+          } else if ((square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece) ||
+            (square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece)) {
+            validSquares.push(square)
+          } else if (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece) {
+            i = -5;
+          }
+        })
+      }
+      squares.forEach((square) => {
+        if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
+          square.row === baseSquare.row - 1 &&
+          square.piece && square.piece.type && square.piece.color !== baseSquare.piece.color) {
+          validSquares.push(square)
+        }
+
+      })
+    }
+
+  } else if (baseSquare.piece.type.includes('bishop')) {
+
+    const bishopMoves = [
+      { x: 1, y: 1 },
+      { x: 1, y: -1 },
+      { x: -1, y: 1 },
+      { x: -1, y: -1 }
+    ]
+    bishopMoves.forEach((dir) => {
+      let scale = 1;
+      for (scale = 1; scale <= 8; scale++) {
+        let offset = { x: dir.x * scale, y: dir.y * scale }
+        squares.forEach((square) => {
+          if ((baseSquare._id === square._id) ||
+            (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
+            if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+              validSquares.push(square)
+              scale = 9;
+            } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece) ||
+              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece.type) ||
+              baseSquare._id === square._id) {
+              validSquares.push(square)
+            } else {
+              square.valid = false;
+              scale = 9;
+            }
+          }
+        })
+      }
+    })
+
+  } else if (baseSquare.piece.type.includes('rook')) {
+    const rookMoves = [
+      { x: 0, y: 1 },
+      { x: 0, y: -1 },
+      { x: 1, y: 0 },
+      { x: -1, y: 0 }
+    ]
+    rookMoves.forEach((dir) => {
+      let scale = 1;
+      for (scale = 1; scale <= 8; scale++) {
+        const offset = { x: dir.x * scale, y: dir.y * scale }
+        squares.forEach((square) => {
+          if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x) ||
+            (square.row === baseSquare.row && square.column === baseSquare.column + offset.y)) {
+            if (square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+              validSquares.push(square)
+              scale = 9;
+            } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
+              (square.column === baseSquare.column && square.row === baseSquare.row + offset.x && square.piece && !square.piece.type) ||
+              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece) ||
+              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && square.piece && !square.piece.type) ||
+              (baseSquare._id === square._id)) {
+              validSquares.push(square)
+            } else {
+              square.valid = false;
+              scale = 9;
+            }
+
+          }
+        })
+      }
+    })
+
+  } else if (baseSquare.piece.type.includes('knight')) {
+    const knightMoves = [
+      { x: 2, y: 1 },
+      { x: -2, y: 1 },
+      { x: 2, y: -1 },
+      { x: -2, y: -1 },
+      { x: 1, y: 2 },
+      { x: 1, y: -2 },
+      { x: -1, y: 2 },
+      { x: -1, y: -2 }
+    ]
+
+    knightMoves.forEach((dir) => {
+      let scale = 1;
+      for (scale = 1; scale <= 1; scale++) {
+        const offset = { x: dir.x * scale, y: dir.y * scale }
+        squares.forEach((square) => {
+          if (baseSquare._id === square._id) {
+            validSquares.push(square)
+          } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y) &&
+            (!square.piece || square.piece.color !== baseSquare.piece.color)) {
+            validSquares.push(square)
+            scale = 9;
+          }
+        })
+      }
+    })
+  } else if (baseSquare.piece.type.includes('queen')) {
+
+    const queenMoves = [
+      { x: 0, y: 1, type: "straight" },
+      { x: 0, y: -1, type: "straight" },
+      { x: 1, y: 0, type: "straight" },
+      { x: -1, y: 0, type: "straight" },
+      { x: 1, y: 1, type: "diagonal" },
+      { x: 1, y: -1, type: "diagonal" },
+      { x: -1, y: 1, type: "diagonal" },
+      { x: -1, y: -1, type: "diagonal" }
+    ]
+    queenMoves.forEach((dir) => {
+      let scale = 1;
+      for (scale = 1; scale <= 8; scale++) {
+        const offset = { x: dir.x * scale, y: dir.y * scale }
+        if (dir.type === "straight") {
+          squares.forEach((square) => {
+            if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x) ||
+              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y)) {
+              if (square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+                validSquares.push(square)
+                scale = 9;
+              } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
+                (square.column === baseSquare.column && square.row === baseSquare.row + offset.x && square.piece && !square.piece.color) ||
+                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece) ||
+                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && square.piece && !square.piece.color) ||
+                (baseSquare._id === square._id)) {
+                validSquares.push(square)
+              } else {
+                square.valid = false;
+                scale = 9;
+              }
+            }
+          })
+        } else {
+          squares.forEach((square) => {
+            if ((baseSquare._id === square._id) ||
+              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
+              if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+                validSquares.push(square)
+                scale = 9;
+              } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece) ||
+                (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && !square.piece.color) ||
+                baseSquare._id === square._id) {
+                validSquares.push(square)
+              } else {
+                square.valid = false;
+                scale = 9;
+              }
+            }
+          })
+        }
+      }
+
+    })
+  } else if (baseSquare.piece.type.includes('king')) {
+    const kingMoves = [
+      { x: 0, y: 1, type: "straight" },
+      { x: 0, y: -1, type: "straight" },
+      { x: 1, y: 0, type: "straight" },
+      { x: -1, y: 0, type: "straight" },
+      { x: 1, y: 1, type: "diagonal" },
+      { x: 1, y: -1, type: "diagonal" },
+      { x: -1, y: 1, type: "diagonal" },
+      { x: -1, y: -1, type: "diagonal" }
+    ]
+    kingMoves.forEach((dir) => {
+      let scale = 1;
+      for (scale = 1; scale <= 1; scale++) {
+        const offset = { x: dir.x * scale, y: dir.y * scale }
+        if (dir.type === "straight") {
+          squares.forEach((square) => {
+            if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x) ||
+              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y)) {
+              if (square.piece && square.piece.color !== baseSquare.piece.color && square.piece.type !== 'king') {
+                validSquares.push(square)
+                scale = 9;
+              } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
+                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece)) {
+                validSquares.push(square)
+              } else {
+                square.valid = false;
+                scale = 9;
+              }
+            }
+          })
+        } else {
+          squares.forEach((square) => {
+            if ((baseSquare._id === square._id) ||
+              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
+              if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color !== baseSquare.piece.color && square.piece.type !== 'king') {
+                validSquares.push(square)
+                scale = 9;
+              } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece)) {
+                validSquares.push(square)
+              } else {
+                square.valid = false;
+                scale = 9;
+              }
+            }
+          })
+        }
+      }
+
+    })
+  }
+  const check = validSquares.filter((square) => square.piece && square.piece.type === 'king')
+
+  if (check.length > 0) {
+    console.log(`${check[0].piece.color} is in check from ${baseSquare.piece.type}`)
+    socketIo.emit('check', `${check[0].piece.color}`)
+    return check[0].piece.color
+  } else {
+    socketIo.emit('check', false)
+    return false
+  }
+}
+
+
+
+socketIo.on('connection', socket => {
+  console.log('user joined')
+  socket.on('disconnect', () => {
+    console.log('user left')
+  })
+  // socket.conn.on('packet', function (packet) {
+  //   if (packet.type === 'ping') console.log('received ping');
+  // });
+  socket.on('movePiece', async data => {
+
+    const user = await User.findOne({ _id: data.roomid })
+    const updatedBoard = user.gameBoard
+    let movedTo = await updatedBoard.find((square) => square.row === +data.targetSquare.row && square.column === +data.targetSquare.column)
+    let movedFrom = updatedBoard.find((square) => square.row === +data.baseSquare.row && square.column === +data.baseSquare.column)
+    movedTo.piece = movedFrom.piece
+    movedFrom.piece = {}
+    let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
+    let i = 0;
+    while (i <= occupiedSquares.length) {
+
+      if (i === occupiedSquares.length) {
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
+        i++
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
+        console.log('revert move')
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
+        movedFrom.piece = movedTo.piece
+        if (data.targetSquare.piece && data.targetSquare.piece.type) {
+          movedTo.piece = data.targetSquare.piece
+        } else {
+          movedTo.piece = {}
+        }
+        const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        setTimeout(() => { socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
+        break;
+      } else {
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      }
+
+    }
+
+  })
+
+})
+
+
+
+
 // Start the server
-app.listen(port, () => {
+http.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
 })
+
+
+
+

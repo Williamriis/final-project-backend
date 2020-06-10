@@ -155,7 +155,9 @@ app.post('/game/:roomid/movepiece', async (req, res) => {
 
 
 app.get('/game/:roomid/reset', async (req, res) => {
+  console.log('resetting')
   try {
+
     const squares = await Square.find()
     const updatedUser = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: squares }, { new: true })
     res.status(200).json(updatedUser.gameBoard)
@@ -234,10 +236,10 @@ const testCheck = (baseSquare, squares, i) => {
       squares.forEach((square) => {
         if ((baseSquare._id === square._id)) {
           validSquares.push(square)
-        } else if (square.column === baseSquare.column && square.row === baseSquare.row + 1 && !square.piece.type) {
+        } else if (square.column === baseSquare.column && square.row === baseSquare.row + 1 && square.piece && !square.piece.type) {
           validSquares.push(square)
         } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
-          square.row === baseSquare.row + 1 &&
+          square.row === baseSquare.row + 1 && square.piece &&
           square.piece.color && square.piece.color !== baseSquare.piece.color) {
           validSquares.push(square)
         } else {
@@ -248,10 +250,11 @@ const testCheck = (baseSquare, squares, i) => {
       squares.forEach((square) => {
         if (baseSquare._id === square._id) {
           validSquares.push(square)
-        } else if (square.column === baseSquare.column && square.row === baseSquare.row - 1 && !square.piece.type) {
+        } else if ((square.column === baseSquare.column && square.row === baseSquare.row - 1 && !square.piece) ||
+          (square.column === baseSquare.column && square.row === baseSquare.row - 1 && square.piece && !square.piece.type)) {
           validSquares.push(square)
         } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
-          square.row === baseSquare.row - 1 && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+          square.row === baseSquare.row - 1 && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
           validSquares.push(square)
         } else {
           square.valid = false;
@@ -542,6 +545,7 @@ socketIo.on('connection', socket => {
     while (i <= occupiedSquares.length) {
 
       if (i === occupiedSquares.length) {
+        movedTo.piece.moved = true;
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
         break;
@@ -568,6 +572,92 @@ socketIo.on('connection', socket => {
 
     }
 
+  })
+  socket.on('castle', async data => {
+    const user = await User.findOne({ _id: data.roomid })
+    const updatedBoard = user.gameBoard
+    const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === (data.targetSquare.column === 1 ? data.targetSquare.column + 2 : data.targetSquare.column - 1))
+    const rookSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === (data.targetSquare.column === 1 ? newSquare.column + 1 : newSquare.column - 1))
+    newSquare.piece = data.baseSquare.piece
+    rookSquare.piece = data.targetSquare.piece
+
+    const formerRookSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === data.targetSquare.column)
+    formerRookSquare.piece = {}
+    const formerKingSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === data.baseSquare.column)
+    formerKingSquare.piece = {}
+
+    let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
+    let i = 0;
+    while (i <= occupiedSquares.length) {
+
+      if (i === occupiedSquares.length) {
+        rookSquare.piece.moved = true
+        newSquare.piece.moved = true
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
+        i++
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
+        console.log('revert move')
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
+        formerRookSquare.piece = data.targetSquare.piece
+        formerKingSquare.piece = data.baseSquare.piece
+        newSquare.piece = {}
+        rookSquare.piece = {}
+        const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        setTimeout(() => { socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
+        break;
+      } else {
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      }
+
+    }
+  })
+
+  socket.on('enPassant', async data => {
+
+    const user = await User.findOne({ _id: data.roomid })
+    const updatedBoard = user.gameBoard
+    const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === data.targetSquare.column)
+    newSquare.piece = data.oldSquare.piece
+    const formerSquare = updatedBoard.find((square) => square.row === data.oldSquare.row && square.column === data.oldSquare.column)
+    formerSquare.piece = {}
+    const takenPawnSquare = newSquare.piece.color === 'white' ? updatedBoard.find((square) => square.column === newSquare.column && square.row === newSquare.row - 1)
+      : updatedBoard.find((square) => square.column === newSquare.column && square.row === newSquare.row + 1)
+    const takenPawnPiece = takenPawnSquare.piece
+    takenPawnSquare.piece = {}
+    let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
+    let i = 0;
+    while (i <= occupiedSquares.length) {
+
+      if (i === occupiedSquares.length) {
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
+        i++
+      } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
+        console.log('revert move')
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
+
+        newSquare.piece = {}
+        formerSquare.piece = data.oldSquare.piece
+        takenPawnSquare.piece = takenPawnPiece
+        const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        setTimeout(() => { socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
+        break;
+      } else {
+        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        break;
+      }
+
+    }
   })
 
 })

@@ -16,7 +16,7 @@
         "row": 1,
         "column": 2,
         "piece": {
-            "type": "knight",
+            "type": "knightOne",
             "color": "white",
             "restingImage": "require('../assets/white-knight.svg.png')",
             "activeImage": "require('../assets/active-white-knight.svg.png')",
@@ -28,7 +28,7 @@
         "row": 1,
         "column": 3,
         "piece": {
-            "type": "bishop",
+            "type": "bishopOne",
             "color": "white",
             "restingImage": "require('../assets/white-bishop.svg.png')",
             "activeImage": "require('../assets/active-white-bishop.png')",
@@ -65,7 +65,7 @@
         "row": 1,
         "column": 6,
         "piece": {
-            "type": "bishop",
+            "type": "bishopTwo",
             "color": "white",
             "restingImage": "require('../assets/white-bishop.svg.png')",
             "activeImage": "require('../assets/active-white-bishop.png')",
@@ -77,7 +77,7 @@
         "row": 1,
         "column": 7,
         "piece": {
-            "type": "knight",
+            "type": "knightTwo",
             "color": "white",
             "restingImage": "require('../assets/white-knight.svg.png')",
             "activeImage": "require('../assets/active-white-knight.svg.png')",
@@ -515,7 +515,7 @@
         "row": 8,
         "column": 2,
         "piece": {
-            "type": "knight",
+            "type": "knightOne",
             "color": "black",
             "restingImage": "require('../assets/black-knight.svg.png')",
             "activeImage": "require('../assets/active-black-knight.svg.png')",
@@ -527,7 +527,7 @@
         "row": 8,
         "column": 3,
         "piece": {
-            "type": "bishop",
+            "type": "bishopOne",
             "color": "black",
             "restingImage": "require('../assets/black-bishop.svg.png')",
             "activeImage": "require('../assets/active-black-bishop.svg.png')",
@@ -564,7 +564,7 @@
         "row": 8,
         "column": 6,
         "piece": {
-            "type": "bishop",
+            "type": "bishopTwo",
             "color": "black",
             "restingImage": "require('../assets/black-bishop.svg.png')",
             "activeImage": "require('../assets/active-black-bishop.svg.png')",
@@ -576,7 +576,7 @@
         "row": 8,
         "column": 7,
         "piece": {
-            "type": "knight",
+            "type": "knightTwo",
             "color": "black",
             "restingImage": "require('../assets/black-knight.svg.png')",
             "activeImage": "require('../assets/active-black-knight.svg.png')",

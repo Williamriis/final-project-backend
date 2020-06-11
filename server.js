@@ -64,6 +64,10 @@ const User = mongoose.model('User', {
   accessToken: {
     type: String,
     default: () => crypto.randomBytes(128).toString('hex')
+  },
+  lostPieces: {
+    type: Array,
+    default: []
   }
 })
 
@@ -175,7 +179,7 @@ app.post('/signup', async (req, res) => {
     const username = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase()
     const { email, password } = req.body
     const user = await new User({ username, email, password: bcrypt.hashSync(password), gameBoard: chessBoard, initialBoardState: chessBoard }).save()
-    res.status(201).json({ id: user._id, accessToken: user.accessToken, profileImage: user.profileImage })
+    res.status(201).json({ id: user._id, accessToken: user.accessToken, lostPieces: user.lostPieces })
   } catch (err) {
     res.status(400).json({ message: "Could not create user", error: err })
   }
@@ -543,16 +547,28 @@ socketIo.on('connection', socket => {
     let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
     let i = 0;
     while (i <= occupiedSquares.length) {
-
       if (i === occupiedSquares.length) {
         movedTo.piece.moved = true;
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        if (data.promote) {
+          if (data.targetSquare.piece && data.targetSquare.piece.type) {
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece })
+          } else {
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color })
+          }
+        } else if (data.targetSquare.piece && data.targetSquare.piece.type) {
+          console.log('piece taken')
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece })
+        } else {
+          console.log('piece not taken')
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        }
         break;
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
         i++
       } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
-        console.log('revert move')
+        //if player was not already in check but moved himself into check and move is reverted
+        //game erroneously thinks he remains in check.
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
         movedFrom.piece = movedTo.piece
@@ -566,7 +582,11 @@ socketIo.on('connection', socket => {
         break;
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        if (data.targetSquare.piece && data.targetSquare.piece.type) {
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece })
+        } else {
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        }
         break;
       }
 
@@ -619,7 +639,7 @@ socketIo.on('connection', socket => {
   })
 
   socket.on('enPassant', async data => {
-
+    //need to add taken pawn to lost pieces
     const user = await User.findOne({ _id: data.roomid })
     const updatedBoard = user.gameBoard
     const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === data.targetSquare.column)
@@ -658,6 +678,16 @@ socketIo.on('connection', socket => {
       }
 
     }
+  })
+
+  socket.on('pawnPromotion', async data => {
+    const user = await User.findOne({ _id: data.roomid })
+    const updatedBoard = user.gameBoard
+    let movedTo = await updatedBoard.find((square) => square.row === +data.targetSquare.row && square.column === +data.targetSquare.column)
+    movedTo.piece = data.piece
+    const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+    socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.piece.color === "white" ? "black" : "white", promotedPiece: data.piece })
+
   })
 
 })

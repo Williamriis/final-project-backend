@@ -544,6 +544,11 @@ socketIo.on('connection', socket => {
     let movedFrom = updatedBoard.find((square) => square.row === +data.baseSquare.row && square.column === +data.baseSquare.column)
     movedTo.piece = movedFrom.piece
     movedFrom.piece = {}
+    const lastMove = {
+      movedFrom: movedFrom,
+      movedTo: movedTo,
+      pieceMoved: movedTo.piece
+    }
     let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
     let i = 0;
     while (i <= occupiedSquares.length) {
@@ -552,23 +557,21 @@ socketIo.on('connection', socket => {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         if (data.promote) {
           if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece })
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove })
           } else {
-            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color })
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove })
           }
         } else if (data.targetSquare.piece && data.targetSquare.piece.type) {
           console.log('piece taken')
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
         } else {
           console.log('piece not taken')
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
         }
         break;
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
         i++
       } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
-        //if player was not already in check but moved himself into check and move is reverted
-        //game erroneously thinks he remains in check.
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
         movedFrom.piece = movedTo.piece
@@ -579,13 +582,17 @@ socketIo.on('connection', socket => {
         }
         const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         setTimeout(() => { socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
-        break;
+        //the next two lines of code are so that if player puts himself into check but was not in check before
+        //after the game reverts his move it doesn't still say player is in check. It seems to work but causes
+        //lag
+        // occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.type)
+        //i = 0
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         if (data.targetSquare.piece && data.targetSquare.piece.type) {
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
         } else {
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
         }
         break;
       }
@@ -605,7 +612,11 @@ socketIo.on('connection', socket => {
     formerRookSquare.piece = {}
     const formerKingSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === data.baseSquare.column)
     formerKingSquare.piece = {}
-
+    const lastMove = {
+      movedFrom: formerKingSquare,
+      movedTo: newSquare,
+      pieceMoved: newSquare.piece
+    }
     let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
     let i = 0;
     while (i <= occupiedSquares.length) {
@@ -614,7 +625,7 @@ socketIo.on('connection', socket => {
         rookSquare.piece.moved = true
         newSquare.piece.moved = true
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
         break;
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
         i++
@@ -631,7 +642,7 @@ socketIo.on('connection', socket => {
         break;
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
         break;
       }
 
@@ -639,7 +650,6 @@ socketIo.on('connection', socket => {
   })
 
   socket.on('enPassant', async data => {
-    //need to add taken pawn to lost pieces
     const user = await User.findOne({ _id: data.roomid })
     const updatedBoard = user.gameBoard
     const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === data.targetSquare.column)
@@ -650,13 +660,18 @@ socketIo.on('connection', socket => {
       : updatedBoard.find((square) => square.column === newSquare.column && square.row === newSquare.row + 1)
     const takenPawnPiece = takenPawnSquare.piece
     takenPawnSquare.piece = {}
+    const lastMove = {
+      movedFrom: formerSquare,
+      movedTo: newSquare,
+      pieceMoved: newSquare.piece
+    }
     let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
     let i = 0;
     while (i <= occupiedSquares.length) {
 
       if (i === occupiedSquares.length) {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, takenPiece: takenPawnPiece })
         break;
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
         i++
@@ -664,7 +679,6 @@ socketIo.on('connection', socket => {
         console.log('revert move')
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
-
         newSquare.piece = {}
         formerSquare.piece = data.oldSquare.piece
         takenPawnSquare.piece = takenPawnPiece
@@ -673,7 +687,7 @@ socketIo.on('connection', socket => {
         break;
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white" })
+        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, takenPiece: takenPawnPiece })
         break;
       }
 

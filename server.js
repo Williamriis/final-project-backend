@@ -529,10 +529,11 @@ const testCheck = (baseSquare, squares, i) => {
 
 
 socketIo.on('connection', socket => {
-  console.log('user joined')
+  socketIo.emit('greeting', 'hello')
   socket.on('disconnect', () => {
     console.log('user left')
   })
+
   // socket.conn.on('packet', function (packet) {
   //   if (packet.type === 'ping') console.log('received ping');
   // });

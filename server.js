@@ -573,8 +573,8 @@ socketIo.on('connection', socket => {
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
         i++
       } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
-        const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
+        // const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+        // socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
         movedFrom.piece = movedTo.piece
         if (data.targetSquare.piece && data.targetSquare.piece.type) {
           movedTo.piece = data.targetSquare.piece

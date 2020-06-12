@@ -588,6 +588,7 @@ socketIo.on('connection', socket => {
         //lag
         // occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.type)
         //i = 0
+        break;
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         if (data.targetSquare.piece && data.targetSquare.piece.type) {

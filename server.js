@@ -575,14 +575,14 @@ socketIo.on('connection', socket => {
       } else if (testCheck(occupiedSquares[i], updatedBoard) === data.color) {
         // const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         // socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
-        movedFrom.piece = movedTo.piece
+        movedFrom.piece = data.baseSquare.piece
         if (data.targetSquare.piece && data.targetSquare.piece.type) {
           movedTo.piece = data.targetSquare.piece
         } else {
           movedTo.piece = {}
         }
         const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        setTimeout(() => { socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
+        socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
         //the next two lines of code are so that if player puts himself into check but was not in check before
         //after the game reverts his move it doesn't still say player is in check. It seems to work but causes
         //lag

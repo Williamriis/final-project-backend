@@ -173,7 +173,6 @@ app.get('/game/:roomid/reset', async (req, res) => {
 })
 
 app.post('/signup', async (req, res) => {
-  console.log('new user is being created')
   try {
     const chessBoard = await Square.find()
     const username = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase()
@@ -184,6 +183,17 @@ app.post('/signup', async (req, res) => {
     res.status(400).json({ message: "Could not create user", error: err })
   }
 })
+
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const user = await User.findOne({})
+    res.status(201).json({ id: user._id, accessToken: user.accessToken, lostPieces: user.lostPieces })
+  } catch (err) {
+    res.status(400).json({ message: "Could not create user", error: err })
+  }
+})
+
 
 
 app.get('/books/:id', async (req, res) => {
@@ -558,16 +568,16 @@ socketIo.on('connection', socket => {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         if (data.promote) {
           if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove })
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 'reset' })
           } else {
-            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove })
+            socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove, checkCount: 'reset' })
           }
         } else if (data.targetSquare.piece && data.targetSquare.piece.type) {
           console.log('piece taken')
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 'reset' })
         } else {
           console.log('piece not taken')
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, checkCount: 'reset' })
         }
         break;
       } else if (testCheck(occupiedSquares[i], updatedBoard) === false) {
@@ -581,8 +591,11 @@ socketIo.on('connection', socket => {
         } else {
           movedTo.piece = {}
         }
+        if (!data.check) {
+          socketIo.emit('check', false)
+        }
         const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-        socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
+        socketIo.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color, checkCount: data.check ? 'decrement' : 'reset', decrementCheckCount: data.check ? true : false })
         //the next two lines of code are so that if player puts himself into check but was not in check before
         //after the game reverts his move it doesn't still say player is in check. It seems to work but causes
         //lag
@@ -592,9 +605,9 @@ socketIo.on('connection', socket => {
       } else {
         const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
         if (data.targetSquare.piece && data.targetSquare.piece.type) {
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 3 })
         } else {
-          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
+          socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, checkCount: 3 })
         }
         break;
       }
@@ -705,7 +718,20 @@ socketIo.on('connection', socket => {
     socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.piece.color === "white" ? "black" : "white", promotedPiece: data.piece })
 
   })
+  socket.on('arrival', data => {
+    console.log(data)
+    socket.broadcast.emit('storeGuest', { username: data.username, color: data.color })
+  })
 
+  socket.on('reset', async data => {
+    try {
+      const squares = await Square.find()
+      const updatedUser = await User.findOneAndUpdate({ _id: data }, { gameBoard: squares }, { new: true })
+      socketIo.emit('newGame', updatedUser.gameBoard)
+    } catch (err) {
+      console.log(err)
+    }
+  })
 })
 
 

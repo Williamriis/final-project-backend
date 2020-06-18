@@ -548,16 +548,16 @@ socketIo.on('connection', socketOne => {
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           if (data.promote) {
             if (data.targetSquare.piece && data.targetSquare.piece.type) {
-              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 'reset' })
+              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove })
             } else {
-              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove, checkCount: 'reset' })
+              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove })
             }
           } else if (data.targetSquare.piece && data.targetSquare.piece.type) {
             console.log('piece taken')
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 'reset' })
+            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
           } else {
             console.log('piece not taken')
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, checkCount: 'reset' })
+            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
           }
           break;
         } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === false) {
@@ -575,7 +575,7 @@ socketIo.on('connection', socketOne => {
             socketIo.emit('check', false)
           }
           const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color, checkCount: data.check ? 'decrement' : 'reset', decrementCheckCount: data.check ? true : false })
+          gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
           //the next two lines of code are so that if player puts himself into check but was not in check before
           //after the game reverts his move it doesn't still say player is in check. It seems to work but causes
           //lag
@@ -585,9 +585,9 @@ socketIo.on('connection', socketOne => {
         } else {
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove, checkCount: 3 })
+            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
           } else {
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, checkCount: 3 })
+            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
           }
           break;
         }
@@ -702,6 +702,10 @@ socketIo.on('connection', socketOne => {
       socket.broadcast.emit('storeGuest', { username: data.username, color: data.color })
     })
 
+    socket.on('resign', data => {
+      gameRoom.emit('winner', 'Player wins')
+    })
+
     socket.on('reset', async data => {
       console.log('resetting')
       try {
@@ -712,6 +716,7 @@ socketIo.on('connection', socketOne => {
         console.log(err)
       }
     })
+
 
   })
 })

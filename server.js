@@ -124,12 +124,12 @@ app.get('/game/:roomid', async (req, res) => {
   //host could be a findOneandUpdate which sets roomActive to true, which becomes a condition for the guest to enter
   //but then I don't know how to revert this to false if the host closes the browser without having clicked a 'logout' button
   try {
-
-    const host = await User.findOne({ _id: req.params.roomid })
+    const squares = await Square.find()
+    const host = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: squares }, { new: true })
     const user = await User.findOne({ accessToken: req.header('Authorization') })
-
+    Square.find()
     res.json({
-      gameBoard: host.gameBoard, initialBoardState: host.initialBoardState,
+      gameBoard: host.gameBoard,
       username: user.username, host: host.username, color: host.username === user.username ? "white" : "black"
     })
 
@@ -150,11 +150,6 @@ app.post('/game/:roomid/movepiece', async (req, res) => {
     movedTo.piece = movedFrom.piece
     movedFrom.piece = {}
     const userBoard = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: updatedBoard }, { new: true })
-    //userBoard
-    // res.status(200).json({ board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
-    //socketIo.of(`/game/${req.params.roomid}`).emit('update', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
-    //socketIo.emit('update', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white" })
-    //socketIo.emit('move', { board: userBoard.gameBoard, currentTurn: req.body.color === "white" ? "black" : "white", room: req.params.roomid })
 
   } catch (err) {
     res.status(404).json({ message: "Invalid move", error: err })
@@ -528,7 +523,6 @@ socketIo.on('connection', socketOne => {
     })
 
     socket.on('movePiece', async data => {
-      console.log('moving')
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
       let movedTo = await updatedBoard.find((square) => square.row === +data.targetSquare.row && square.column === +data.targetSquare.column)
@@ -563,24 +557,14 @@ socketIo.on('connection', socketOne => {
         } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === false) {
           i++
         } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === data.color) {
-          // const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          // socketIo.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
           movedFrom.piece = data.baseSquare.piece
           if (data.targetSquare.piece && data.targetSquare.piece.type) {
             movedTo.piece = data.targetSquare.piece
           } else {
             movedTo.piece = {}
           }
-          if (!data.check) {
-            socketIo.emit('check', false)
-          }
           const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
-          //the next two lines of code are so that if player puts himself into check but was not in check before
-          //after the game reverts his move it doesn't still say player is in check. It seems to work but causes
-          //lag
-          // occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.type)
-          //i = 0
           break;
         } else {
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
@@ -707,7 +691,6 @@ socketIo.on('connection', socketOne => {
     })
 
     socket.on('reset', async data => {
-      console.log('resetting')
       try {
         const squares = await Square.find()
         const updatedUser = await User.findOneAndUpdate({ _id: data }, { gameBoard: squares }, { new: true })

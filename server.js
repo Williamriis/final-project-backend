@@ -112,17 +112,9 @@ app.get('/users', async (req, res) => {
   res.json(users)
 })
 
-
-app.get('/', async (req, res) => {
-  res.send("hello")
-
-})
-
-
 app.get('/game/:roomid', authenticateUser)
 app.get('/game/:roomid', async (req, res) => {
-  //host could be a findOneandUpdate which sets roomActive to true, which becomes a condition for the guest to enter
-  //but then I don't know how to revert this to false if the host closes the browser without having clicked a 'logout' button
+
   try {
     const squares = await Square.find()
     const host = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: squares }, { new: true })

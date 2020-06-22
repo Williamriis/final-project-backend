@@ -40,11 +40,12 @@
         "row": 1,
         "column": 4,
         "piece": {
-            "type": "queen",
+            "type": "king",
             "color": "white",
-            "restingImage": "require('../assets/white-queen.svg.png')",
-            "activeImage": "require('../assets/active-white-queen.svg.png')",
-            "image": "white-queen.svg.png"
+            "restingImage": "require('../assets/white-king.svg.png')",
+            "activeImage": "require('../assets/active-white-king.svg.png')",
+            "image": "white-king.svg.png",
+            "moved": false
         },
         "valid": false
     },
@@ -52,12 +53,11 @@
         "row": 1,
         "column": 5,
         "piece": {
-            "type": "king",
+            "type": "queen",
             "color": "white",
-            "restingImage": "require('../assets/white-king.svg.png')",
-            "activeImage": "require('../assets/active-white-king.svg.png')",
-            "image": "white-king.svg.png",
-            "moved": false
+            "restingImage": "require('../assets/white-queen.svg.png')",
+            "activeImage": "require('../assets/active-white-queen.svg.png')",
+            "image": "white-queen.svg.png"
         },
         "valid": false
     },
@@ -539,11 +539,12 @@
         "row": 8,
         "column": 4,
         "piece": {
-            "type": "queen",
+            "type": "king",
             "color": "black",
-            "restingImage": "require('../assets/black-queen.svg.png')",
-            "activeImage": "require('../assets/active-black-queen.svg.png')",
-            "image": "black-queen.svg.png"
+            "restingImage": "require('../assets/black-king.svg.png')",
+            "activeImage": "require('../assets/active-black-king.svg.png')",
+            "image": "black-king.svg.png",
+            "moved": false
         },
         "valid": false
     },
@@ -551,12 +552,11 @@
         "row": 8,
         "column": 5,
         "piece": {
-            "type": "king",
+            "type": "queen",
             "color": "black",
-            "restingImage": "require('../assets/black-king.svg.png')",
-            "activeImage": "require('../assets/active-black-king.svg.png')",
-            "image": "black-king.svg.png",
-            "moved": false
+            "restingImage": "require('../assets/black-queen.svg.png')",
+            "activeImage": "require('../assets/active-black-queen.svg.png')",
+            "image": "black-queen.svg.png"
         },
         "valid": false
     },

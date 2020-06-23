@@ -451,11 +451,12 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
     console.log(`${check[0].piece.color} is in check from ${baseSquare.piece.type}`)
     if (alreadyInCheck && check[0].piece.color !== color) {
       gameRoom.emit('check', color)
+      return color
     } else {
       gameRoom.emit('check', `${check[0].piece.color}`)
-
+      return check[0].piece.color
     }
-    return check[0].piece.color
+
   } else {
     gameRoom.emit('check', false)
     return false

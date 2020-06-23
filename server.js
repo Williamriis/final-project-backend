@@ -448,7 +448,7 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
   const check = validSquares.filter((square) => square.piece && square.piece.type === 'king')
 
   if (check.length > 0) {
-    console.log(`${check[0].piece.color} is in check from ${baseSquare.piece.type}`)
+
     if (alreadyInCheck && check[0].piece.color !== color) {
       gameRoom.emit('check', color)
       return color

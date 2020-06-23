@@ -163,7 +163,7 @@ app.post('/sessions', async (req, res) => {
 
 ///TESTING CHECK////
 
-const testCheck = (baseSquare, squares, gameRoom) => {
+const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
   const validSquares = []
 
   if (baseSquare.piece.type.includes('pawn') && baseSquare.piece.moved) {
@@ -449,7 +449,12 @@ const testCheck = (baseSquare, squares, gameRoom) => {
 
   if (check.length > 0) {
     console.log(`${check[0].piece.color} is in check from ${baseSquare.piece.type}`)
-    gameRoom.emit('check', `${check[0].piece.color}`)
+    if (alreadyInCheck && check[0].piece.color !== color) {
+      gameRoom.emit('check', color)
+    } else {
+      gameRoom.emit('check', `${check[0].piece.color}`)
+
+    }
     return check[0].piece.color
   } else {
     gameRoom.emit('check', false)
@@ -507,9 +512,9 @@ socketIo.on('connection', socketOne => {
             gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
           }
           break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === false) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
           i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === data.color) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
           movedFrom.piece = data.baseSquare.piece
           if (data.targetSquare.piece && data.targetSquare.piece.type) {
             movedTo.piece = data.targetSquare.piece
@@ -568,9 +573,9 @@ socketIo.on('connection', socketOne => {
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
           break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === false) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
           i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === data.color) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
           console.log('revert move')
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
@@ -619,9 +624,9 @@ socketIo.on('connection', socketOne => {
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, takenPiece: takenPawnPiece })
           break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === false) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
           i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom) === data.color) {
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
           console.log('revert move')
           const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true } })

@@ -7,8 +7,6 @@ import crypto from 'crypto'
 import bcrypt from 'bcrypt-nodejs'
 
 
-
-
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
@@ -29,8 +27,6 @@ app.use((req, res, next) => {
     res.status(503).json({ error: 'Service unavailable' })
   }
 })
-
-
 
 
 const Square = mongoose.model('Square', {
@@ -112,6 +108,8 @@ app.get('/users', async (req, res) => {
   res.json(users)
 })
 
+///INITIAL GAME STATE////
+
 app.get('/game/:roomid', authenticateUser)
 app.get('/game/:roomid', async (req, res) => {
 
@@ -131,38 +129,7 @@ app.get('/game/:roomid', async (req, res) => {
 
 })
 
-
-app.post('/game/:roomid/movepiece', authenticateUser)
-app.post('/game/:roomid/movepiece', async (req, res) => {
-  try {
-    const user = await User.findOne({ _id: req.params.roomid })
-    const updatedBoard = user.gameBoard
-    let movedTo = await updatedBoard.find((square) => square.row === +req.body.targetSquare.row && square.column === +req.body.targetSquare.column)
-    let movedFrom = updatedBoard.find((square) => square.row === +req.body.baseSquare.row && square.column === +req.body.baseSquare.column)
-    movedTo.piece = movedFrom.piece
-    movedFrom.piece = {}
-    const userBoard = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: updatedBoard }, { new: true })
-
-  } catch (err) {
-    res.status(404).json({ message: "Invalid move", error: err })
-  }
-})
-
-
-
-app.get('/game/:roomid/reset', async (req, res) => {
-  console.log('resetting')
-  try {
-
-    const squares = await Square.find()
-    const updatedUser = await User.findOneAndUpdate({ _id: req.params.roomid }, { gameBoard: squares }, { new: true })
-    res.status(200).json(updatedUser.gameBoard)
-  } catch (err) {
-    res.status(404).json({ message: "Only the host can reset the game", error: err })
-  }
-
-
-})
+///SIGNUP ENDPOINT///
 
 app.post('/signup', async (req, res) => {
   try {
@@ -184,6 +151,7 @@ app.post('/signup', async (req, res) => {
   }
 })
 
+///LOGIN ENDPOINT///
 app.post('/sessions', async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
@@ -193,7 +161,7 @@ app.post('/sessions', async (req, res) => {
   }
 })
 
-
+///TESTING CHECK////
 
 const testCheck = (baseSquare, squares, gameRoom) => {
   const validSquares = []
@@ -489,30 +457,21 @@ const testCheck = (baseSquare, squares, gameRoom) => {
   }
 }
 
-
+//////WEBSOCKET STUFF/////
 
 socketIo.on('connection', socketOne => {
 
-  console.log('user joined')
-
-
-
   const gameRoom = socketIo.of(`/${socketOne.request._query.id}`)
-
-  socketOne.on('disconnect', socketOne => {
-
-  })
-
 
 
   gameRoom.on('connection', socket => {
-
-    console.log('user joined')
 
     socket.on('disconnect', () => {
       gameRoom.emit('userLeft', 'User Left!')
       gameRoom.removeAllListeners()
     })
+
+    ///NORMAL PIECE MOVEMENT/////
 
     socket.on('movePiece', async data => {
       const user = await User.findOne({ _id: data.roomid })
@@ -526,6 +485,8 @@ socketIo.on('connection', socketOne => {
         movedTo: movedTo,
         pieceMoved: movedTo.piece
       }
+      ///CHECK IF PIECE MOVEMENT PLACES EITHER PLAYER IN CHECK///
+
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
       let i = 0;
       while (i <= occupiedSquares.length) {
@@ -555,6 +516,9 @@ socketIo.on('connection', socketOne => {
           } else {
             movedTo.piece = {}
           }
+          if (!data.check) {
+            gameRoom.emit('check', false)
+          }
           const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
           gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
           break;
@@ -571,6 +535,9 @@ socketIo.on('connection', socketOne => {
       }
 
     })
+
+    ////CASTLING////
+
     socket.on('castle', async data => {
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
@@ -588,6 +555,9 @@ socketIo.on('connection', socketOne => {
         movedTo: newSquare,
         pieceMoved: newSquare.piece
       }
+
+      ///CHECK IF CASTLING PLACES EITHER PLAYER IN CHECK///
+
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
       let i = 0;
       while (i <= occupiedSquares.length) {
@@ -620,6 +590,8 @@ socketIo.on('connection', socketOne => {
       }
     })
 
+    /////EN PASSANT/////
+
     socket.on('enPassant', async data => {
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
@@ -636,6 +608,9 @@ socketIo.on('connection', socketOne => {
         movedTo: newSquare,
         pieceMoved: newSquare.piece
       }
+
+      ///CHECK IF EN PASSANT PLACES EITHER PLAYER IN CHECK////
+
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
       let i = 0;
       while (i <= occupiedSquares.length) {
@@ -665,6 +640,8 @@ socketIo.on('connection', socketOne => {
       }
     })
 
+    ///PAWN PROMOTION////
+
     socket.on('pawnPromotion', async data => {
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
@@ -674,14 +651,18 @@ socketIo.on('connection', socketOne => {
       gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.piece.color === "white" ? "black" : "white", promotedPiece: data.piece })
 
     })
+
+    ///GUEST ENTERS HOST ROOM///
     socket.on('arrival', data => {
       socket.broadcast.emit('storeGuest', { username: data.username, color: data.color })
     })
 
+    ///PLAYER RESIGNS////
     socket.on('resign', data => {
       gameRoom.emit('winner', 'Player wins')
     })
 
+    ///RESET GAME/////
     socket.on('reset', async data => {
       try {
         const squares = await Square.find()
@@ -697,9 +678,6 @@ socketIo.on('connection', socketOne => {
 })
 
 
-
-
-// Start the server
 http.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
 })

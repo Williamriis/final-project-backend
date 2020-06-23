@@ -547,7 +547,7 @@ socketIo.on('connection', socketOne => {
     socket.on('castle', async data => {
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
-      const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === (data.targetSquare.column === 1 ? data.targetSquare.column + 2 : data.targetSquare.column - 1))
+      const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === (data.targetSquare.column === 1 ? data.targetSquare.column + 1 : data.targetSquare.column - 2))
       const rookSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === (data.targetSquare.column === 1 ? newSquare.column + 1 : newSquare.column - 1))
       newSquare.piece = data.baseSquare.piece
       rookSquare.piece = data.targetSquare.piece

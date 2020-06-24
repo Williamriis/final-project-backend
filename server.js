@@ -147,7 +147,7 @@ app.post('/signup', async (req, res) => {
       res.status(201).json({ id: user._id, accessToken: user.accessToken })
     }
   } catch (err) {
-    res.status(404).json({ error: "Username exists" })
+    res.status(404).json({ error: "Username exists", message: err })
   }
 })
 
@@ -677,6 +677,11 @@ socketIo.on('connection', socketOne => {
       } catch (err) {
         console.log(err)
       }
+    })
+
+    socket.on('message', data => {
+      console.log('message recieved')
+      gameRoom.emit('newMessage', data)
     })
 
 

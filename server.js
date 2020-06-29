@@ -171,7 +171,8 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
       squares.forEach((square) => {
         if ((baseSquare._id === square._id)) {
           validSquares.push(square)
-        } else if (square.column === baseSquare.column && square.row === baseSquare.row + 1 && square.piece && !square.piece.type) {
+        } else if (square.column === baseSquare.column && square.row === baseSquare.row + 1
+          && square.piece && !square.piece.type) {
           validSquares.push(square)
         } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
           square.row === baseSquare.row + 1 && square.piece &&
@@ -185,11 +186,15 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
       squares.forEach((square) => {
         if (baseSquare._id === square._id) {
           validSquares.push(square)
-        } else if ((square.column === baseSquare.column && square.row === baseSquare.row - 1 && !square.piece) ||
-          (square.column === baseSquare.column && square.row === baseSquare.row - 1 && square.piece && !square.piece.type)) {
+        } else if ((square.column === baseSquare.column &&
+          square.row === baseSquare.row - 1 && !square.piece) ||
+          (square.column === baseSquare.column && square.row === baseSquare.row - 1 &&
+            square.piece && !square.piece.type)) {
           validSquares.push(square)
-        } else if ((square.column === baseSquare.column + 1 || square.column === baseSquare.column - 1) &&
-          square.row === baseSquare.row - 1 && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+        } else if ((square.column === baseSquare.column + 1 ||
+          square.column === baseSquare.column - 1) &&
+          square.row === baseSquare.row - 1 && square.piece && square.piece.color &&
+          square.piece.color !== baseSquare.piece.color) {
           validSquares.push(square)
         } else {
           square.valid = false;
@@ -206,10 +211,13 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         squares.forEach((square) => {
           if (baseSquare._id === square._id) {
             validSquares.push(square)
-          } else if ((square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece) ||
-            (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece && !square.piece.color)) {
+          } else if ((square.column === baseSquare.column &&
+            square.row === baseSquare.row + i && !square.piece) ||
+            (square.column === baseSquare.column && square.row === baseSquare.row + i &&
+              square.piece && !square.piece.color)) {
             validSquares.push(square)
-          } else if (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece) {
+          } else if (square.column === baseSquare.column && square.row === baseSquare.row + i &&
+            square.piece) {
             i = 5;
           }
         })
@@ -229,10 +237,13 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         squares.forEach((square) => {
           if (baseSquare._id === square._id) {
             validSquares.push(square)
-          } else if ((square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece) ||
-            (square.column === baseSquare.column && square.row === baseSquare.row + i && !square.piece)) {
+          } else if ((square.column === baseSquare.column &&
+            square.row === baseSquare.row + i && !square.piece) ||
+            (square.column === baseSquare.column &&
+              square.row === baseSquare.row + i && !square.piece)) {
             validSquares.push(square)
-          } else if (square.column === baseSquare.column && square.row === baseSquare.row + i && square.piece) {
+          } else if (square.column === baseSquare.column &&
+            square.row === baseSquare.row + i && square.piece) {
             i = -5;
           }
         })
@@ -261,12 +272,19 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         let offset = { x: dir.x * scale, y: dir.y * scale }
         squares.forEach((square) => {
           if ((baseSquare._id === square._id) ||
-            (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
-            if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+            (square.row === baseSquare.row + offset.x &&
+              square.column === baseSquare.column + offset.y)) {
+
+            if (square.row === baseSquare.row + offset.x &&
+              square.column === baseSquare.column + offset.y && square.piece &&
+              square.piece.color && square.piece.color !== baseSquare.piece.color) {
               validSquares.push(square)
               scale = 9;
-            } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece) ||
-              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece.type) ||
+
+            } else if ((square.row === baseSquare.row + offset.x &&
+              square.column === baseSquare.column + offset.y && !square.piece) ||
+              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y
+                && !square.piece.type) ||
               baseSquare._id === square._id) {
               validSquares.push(square)
             } else {
@@ -295,10 +313,14 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
             if (square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
               validSquares.push(square)
               scale = 9;
-            } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
-              (square.column === baseSquare.column && square.row === baseSquare.row + offset.x && square.piece && !square.piece.type) ||
-              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece) ||
-              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && square.piece && !square.piece.type) ||
+            } else if ((square.column === baseSquare.column &&
+              square.row === baseSquare.row + offset.x && !square.piece) ||
+              (square.column === baseSquare.column && square.row === baseSquare.row + offset.x &&
+                square.piece && !square.piece.type) ||
+              (square.row === baseSquare.row &&
+                square.column === baseSquare.column + offset.y && !square.piece) ||
+              (square.row === baseSquare.row && square.column === baseSquare.column + offset.y &&
+                square.piece && !square.piece.type) ||
               (baseSquare._id === square._id)) {
               validSquares.push(square)
             } else {
@@ -330,7 +352,8 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         squares.forEach((square) => {
           if (baseSquare._id === square._id) {
             validSquares.push(square)
-          } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y) &&
+          } else if ((square.row === baseSquare.row + offset.x &&
+            square.column === baseSquare.column + offset.y) &&
             (!square.piece || square.piece.color !== baseSquare.piece.color)) {
             validSquares.push(square)
             scale = 9;
@@ -361,10 +384,15 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
               if (square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
                 validSquares.push(square)
                 scale = 9;
-              } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
-                (square.column === baseSquare.column && square.row === baseSquare.row + offset.x && square.piece && !square.piece.color) ||
-                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece) ||
-                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && square.piece && !square.piece.color) ||
+              } else if ((square.column === baseSquare.column &&
+                square.row === baseSquare.row + offset.x && !square.piece) ||
+                (square.column === baseSquare.column &&
+                  square.row === baseSquare.row + offset.x && square.piece && !square.piece.color) ||
+                (square.row === baseSquare.row &&
+                  square.column === baseSquare.column + offset.y && !square.piece) ||
+                (square.row === baseSquare.row &&
+                  square.column === baseSquare.column + offset.y &&
+                  square.piece && !square.piece.color) ||
                 (baseSquare._id === square._id)) {
                 validSquares.push(square)
               } else {
@@ -376,12 +404,17 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         } else {
           squares.forEach((square) => {
             if ((baseSquare._id === square._id) ||
-              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
-              if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color && square.piece.color !== baseSquare.piece.color) {
+              (square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y)) {
+              if (square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y && square.piece &&
+                square.piece.color && square.piece.color !== baseSquare.piece.color) {
                 validSquares.push(square)
                 scale = 9;
-              } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece) ||
-                (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && !square.piece.color) ||
+              } else if ((square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y && !square.piece) ||
+                (square.row === baseSquare.row + offset.x &&
+                  square.column === baseSquare.column + offset.y && square.piece && !square.piece.color) ||
                 baseSquare._id === square._id) {
                 validSquares.push(square)
               } else {
@@ -416,8 +449,10 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
               if (square.piece && square.piece.color !== baseSquare.piece.color && square.piece.type !== 'king') {
                 validSquares.push(square)
                 scale = 9;
-              } else if ((square.column === baseSquare.column && square.row === baseSquare.row + offset.x && !square.piece) ||
-                (square.row === baseSquare.row && square.column === baseSquare.column + offset.y && !square.piece)) {
+              } else if ((square.column === baseSquare.column &&
+                square.row === baseSquare.row + offset.x && !square.piece) ||
+                (square.row === baseSquare.row &&
+                  square.column === baseSquare.column + offset.y && !square.piece)) {
                 validSquares.push(square)
               } else {
                 square.valid = false;
@@ -428,11 +463,15 @@ const testCheck = (baseSquare, squares, gameRoom, alreadyInCheck, color) => {
         } else {
           squares.forEach((square) => {
             if ((baseSquare._id === square._id) ||
-              (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y)) {
-              if (square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && square.piece && square.piece.color !== baseSquare.piece.color && square.piece.type !== 'king') {
+              (square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y)) {
+              if (square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y && square.piece &&
+                square.piece.color !== baseSquare.piece.color && square.piece.type !== 'king') {
                 validSquares.push(square)
                 scale = 9;
-              } else if ((square.row === baseSquare.row + offset.x && square.column === baseSquare.column + offset.y && !square.piece)) {
+              } else if ((square.row === baseSquare.row + offset.x &&
+                square.column === baseSquare.column + offset.y && !square.piece)) {
                 validSquares.push(square)
               } else {
                 square.valid = false;
@@ -469,13 +508,121 @@ socketIo.on('connection', socketOne => {
 
   const gameRoom = socketIo.of(`/${socketOne.request._query.id}`)
 
-
   gameRoom.on('connection', socket => {
 
     socket.on('disconnect', () => {
       gameRoom.emit('userLeft', 'User Left!')
       gameRoom.removeAllListeners()
     })
+
+    const testCheckAndUpdate = async (type, data, occupiedSquares, updatedBoard, movedTo, movedFrom, lastMove,
+      rookSquare, formerRookSquare, takenPawnSquare, takenPawnPiece) => {
+      let i = 0;
+      while (i <= occupiedSquares.length) {
+        //NEITHER PLAYER IN CHECK
+        if (i === occupiedSquares.length) {
+          movedTo.piece.moved = true;
+          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
+          if (data.promote) {
+
+            if (data.targetSquare.piece && data.targetSquare.piece.type) {
+              gameRoom.emit('update', {
+                board: { board: userBoard.gameBoard, writable: true },
+                promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove
+              })
+
+            } else {
+              gameRoom.emit('update', {
+                board: { board: userBoard.gameBoard, writable: true },
+                promote: data.color, lastMove: lastMove
+              })
+            }
+          } else if (data.targetSquare.piece && data.targetSquare.piece.type && !formerRookSquare) {
+
+            gameRoom.emit('update', {
+              board: { board: userBoard.gameBoard, writable: true },
+              currentTurn: data.color === "white" ? "black" : "white",
+              takenPiece: data.targetSquare.piece, lastMove: lastMove
+            })
+
+          } else if (type === 'enPassant') {
+
+            gameRoom.emit('update', {
+              board: { board: userBoard.gameBoard, writable: true },
+              currentTurn: data.color === "white" ? "black" : "white", takenPiece: takenPawnPiece,
+              lastMove: lastMove
+            })
+
+          } else {
+
+            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
+          }
+          break;
+
+          //STILL RUNNING NEITHER PLAYER YET IN CHECK
+
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
+          i++
+
+          //PLAYER HAS PLACED THEMSELVES IN CHECK/FAILED TO MOVE OUT OF CHECK
+        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
+          //CHECKS TYPE OF MOVE AND REPLACES PIECES IN FORMER CONFIGURATION, PLAYER MUST MOVE AGAIN
+
+          if (type === 'castle') {
+            formerRookSquare.piece = data.targetSquare.piece
+            movedFrom.piece = data.baseSquare.piece
+            movedTo.piece = {}
+            rookSquare.piece = {}
+          } else if (type === 'enPassant') {
+            movedTo.piece = {}
+            movedFrom.piece = data.oldSquare.piece
+            takenPawnSquare.piece = takenPawnPiece
+          } else {
+            movedFrom.piece = data.baseSquare.piece
+            if (data.targetSquare.piece && data.targetSquare.piece.type) {
+              movedTo.piece = data.targetSquare.piece
+            } else {
+              movedTo.piece = {}
+            }
+          }
+          //IF PLAYER PUT THEMSELVES IN CHECK, CHECK IS FALSE, OTHERWISE THEY HAVE LEFT THEMSELVES IN CHECK
+          //AND ARE STILL IN CHECK
+          if (!data.check) {
+            gameRoom.emit('check', false)
+          }
+
+          const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid },
+            { gameBoard: updatedBoard }, { new: true })
+
+          gameRoom.emit('update', {
+            board: { board: revertedBoard.gameBoard, writable: true },
+            currentTurn: data.color
+          })
+
+          break;
+
+          //OTHER PLAYER HAS BEEN PUT IN CHECK
+        } else {
+          const userBoard = await User.findOneAndUpdate({ _id: data.roomid },
+            { gameBoard: updatedBoard }, { new: true })
+          if (data.targetSquare.piece && data.targetSquare.piece.type) {
+
+            gameRoom.emit('update', {
+              board: { board: userBoard.gameBoard, writable: true },
+              currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove
+            })
+          } else {
+
+            gameRoom.emit('update', {
+              board: { board: userBoard.gameBoard, writable: true },
+              currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove
+            })
+          }
+          break;
+        }
+
+      }
+    }
 
     ///NORMAL PIECE MOVEMENT/////
 
@@ -494,51 +641,8 @@ socketIo.on('connection', socketOne => {
       ///CHECK IF PIECE MOVEMENT PLACES EITHER PLAYER IN CHECK///
 
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
-      let i = 0;
-      while (i <= occupiedSquares.length) {
-        if (i === occupiedSquares.length) {
-          movedTo.piece.moved = true;
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          if (data.promote) {
-            if (data.targetSquare.piece && data.targetSquare.piece.type) {
-              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, takenPiece: data.targetSquare.piece, lastMove: lastMove })
-            } else {
-              gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, promote: data.color, lastMove: lastMove })
-            }
-          } else if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            console.log('piece taken')
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
-          } else {
-            console.log('piece not taken')
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
-          }
-          break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
-          i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
-          movedFrom.piece = data.baseSquare.piece
-          if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            movedTo.piece = data.targetSquare.piece
-          } else {
-            movedTo.piece = {}
-          }
-          if (!data.check) {
-            gameRoom.emit('check', false)
-          }
-          const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color })
-          break;
-        } else {
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          if (data.targetSquare.piece && data.targetSquare.piece.type) {
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", takenPiece: data.targetSquare.piece, lastMove: lastMove })
-          } else {
-            gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
-          }
-          break;
-        }
+      testCheckAndUpdate('normal', data, occupiedSquares, updatedBoard, movedTo, movedFrom, lastMove)
 
-      }
 
     })
 
@@ -547,9 +651,9 @@ socketIo.on('connection', socketOne => {
     socket.on('castle', async data => {
       const user = await User.findOne({ _id: data.roomid })
       const updatedBoard = user.gameBoard
-      const newSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === (data.targetSquare.column === 1 ? data.targetSquare.column + 1 : data.targetSquare.column - 2))
-      const rookSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === (data.targetSquare.column === 1 ? newSquare.column + 1 : newSquare.column - 1))
-      newSquare.piece = data.baseSquare.piece
+      const movedTo = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === (data.targetSquare.column === 1 ? data.targetSquare.column + 1 : data.targetSquare.column - 2))
+      const rookSquare = updatedBoard.find((square) => square.row === data.baseSquare.row && square.column === (data.targetSquare.column === 1 ? movedTo.column + 1 : movedTo.column - 1))
+      movedTo.piece = data.baseSquare.piece
       rookSquare.piece = data.targetSquare.piece
 
       const formerRookSquare = updatedBoard.find((square) => square.row === data.targetSquare.row && square.column === data.targetSquare.column)
@@ -558,42 +662,17 @@ socketIo.on('connection', socketOne => {
       formerKingSquare.piece = {}
       const lastMove = {
         movedFrom: formerKingSquare,
-        movedTo: newSquare,
-        pieceMoved: newSquare.piece
+        movedTo: movedTo,
+        pieceMoved: movedTo.piece
       }
 
       ///CHECK IF CASTLING PLACES EITHER PLAYER IN CHECK///
 
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
-      let i = 0;
-      while (i <= occupiedSquares.length) {
+      testCheckAndUpdate('castle', data, occupiedSquares, updatedBoard, movedTo, formerKingSquare, lastMove,
+        rookSquare, formerRookSquare)
 
-        if (i === occupiedSquares.length) {
-          rookSquare.piece.moved = true
-          newSquare.piece.moved = true
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
-          break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
-          i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
-          console.log('revert move')
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
-          formerRookSquare.piece = data.targetSquare.piece
-          formerKingSquare.piece = data.baseSquare.piece
-          newSquare.piece = {}
-          rookSquare.piece = {}
-          const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          setTimeout(() => { gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
-          break;
-        } else {
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove })
-          break;
-        }
 
-      }
     })
 
     /////EN PASSANT/////
@@ -618,32 +697,10 @@ socketIo.on('connection', socketOne => {
       ///CHECK IF EN PASSANT PLACES EITHER PLAYER IN CHECK////
 
       let occupiedSquares = updatedBoard.filter((square) => square.piece && square.piece.color)
-      let i = 0;
-      while (i <= occupiedSquares.length) {
+      testCheckAndUpdate('enPassant', data, occupiedSquares, updatedBoard, newSquare, formerSquare, lastMove,
+        'blank', 'blank', takenPawnSquare, takenPawnPiece)
 
-        if (i === occupiedSquares.length) {
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, takenPiece: takenPawnPiece })
-          break;
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === false) {
-          i++
-        } else if (testCheck(occupiedSquares[i], updatedBoard, gameRoom, data.check, data.color) === data.color) {
-          console.log('revert move')
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true } })
-          newSquare.piece = {}
-          formerSquare.piece = data.oldSquare.piece
-          takenPawnSquare.piece = takenPawnPiece
-          const revertedBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          setTimeout(() => { gameRoom.emit('update', { board: { board: revertedBoard.gameBoard, writable: true }, currentTurn: data.color }) }, 500)
-          break;
-        } else {
-          const userBoard = await User.findOneAndUpdate({ _id: data.roomid }, { gameBoard: updatedBoard }, { new: true })
-          gameRoom.emit('update', { board: { board: userBoard.gameBoard, writable: true }, currentTurn: data.color === "white" ? "black" : "white", lastMove: lastMove, takenPiece: takenPawnPiece })
-          break;
-        }
 
-      }
     })
 
     ///PAWN PROMOTION////
@@ -692,7 +749,4 @@ socketIo.on('connection', socketOne => {
 http.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
 })
-
-
-
 
